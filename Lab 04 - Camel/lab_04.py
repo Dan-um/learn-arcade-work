@@ -47,21 +47,33 @@ def main():
 
         # If the user wants to travel full speed
         elif user_choice.upper() == "C":
-            miles_traveled_today = random.randrange(10, 21)
-            miles_traveled = miles_traveled_today + miles_traveled
-            print("You traveled", miles_traveled_today, "miles.")
-            player_thirst = player_thirst + 1
-            camel_fatigue = camel_fatigue + random.randrange(1, 4)
-            miles_traveled_natives = miles_traveled_natives + random.randrange(7, 15)
+            if random.randrange(21) == 0:
+                print("You found an oasis!")
+                player_thirst = 0
+                canteen_drinks = 0
+                camel_fatigue = 0
+            else:
+                miles_traveled_today = random.randrange(10, 21)
+                miles_traveled = miles_traveled_today + miles_traveled
+                print("You traveled", miles_traveled_today, "miles.")
+                player_thirst = player_thirst + 1
+                camel_fatigue = camel_fatigue + random.randrange(1, 4)
+                miles_traveled_natives = miles_traveled_natives + random.randrange(7, 15)
 
         # If the user wants to travel moderate speed
         elif user_choice.upper() == "B":
-            miles_traveled_today = random.randrange(5, 13)
-            miles_traveled = miles_traveled_today + miles_traveled
-            print("You traveled", miles_traveled_today, "miles.")
-            player_thirst = player_thirst + 1
-            camel_fatigue = camel_fatigue + 1
-            miles_traveled_natives = miles_traveled_natives + random.randrange(7, 15)
+            if random.randrange(21) == 0:
+                print("You found an oasis!")
+                player_thirst = 0
+                canteen_drinks = 0
+                camel_fatigue = 0
+            else:
+                miles_traveled_today = random.randrange(5, 13)
+                miles_traveled = miles_traveled_today + miles_traveled
+                print("You traveled", miles_traveled_today, "miles.")
+                player_thirst = player_thirst + 1
+                camel_fatigue = camel_fatigue + 1
+                miles_traveled_natives = miles_traveled_natives + random.randrange(7, 15)
 
         # If the user wants to take a drink from the canteen
         elif user_choice.upper() == "A":
