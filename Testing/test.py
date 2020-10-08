@@ -104,9 +104,13 @@ def main():
     window.setup()
     arcade.run()
 
+main()
 
-if __name__ == "__main__":
-    main()
+
+
+
+
+print("hello")
 
 
 
