@@ -14,7 +14,7 @@ VIEWPORT_MARGIN = 40
 
 MOVEMENT_SPEED = 5
 
-COIN_COUNT = 50
+COIN_COUNT = 75
 
 
 class MyGame(arcade.Window):
@@ -63,13 +63,29 @@ class MyGame(arcade.Window):
 
         # Set up walls
         # Walls from Kenney.nl
-        # Crashes Python? Create Border
-        # for x in range(0, 1200, 64):
-        #     for y in range(0, 1200, 64):
-        #         border = arcade.Sprite("brickGrey.png", SPRITE_SCALING)
-        #         border.center_x = x
-        #         border.center_y = y
-        #         self.wall_list.append(border)
+        # Create border
+
+        for x in range(-100, 1200, 64):
+            border = arcade.Sprite("brickGrey.png", SPRITE_SCALING)
+            border.center_x = x
+            border.center_y = 0
+            self.wall_list.append(border)
+        for x in range(-100, 1200, 64):
+            border = arcade.Sprite("brickGrey.png", SPRITE_SCALING)
+            border.center_x = x
+            border.center_y = 800
+            self.wall_list.append(border)
+        for y in range(0, 800, 64):
+            border = arcade.Sprite("brickGrey.png", SPRITE_SCALING)
+            border.center_x = 0
+            border.center_y = y
+            self.wall_list.append(border)
+        for y in range(0, 800, 64):
+            border = arcade.Sprite("brickGrey.png", SPRITE_SCALING)
+            border.center_x = 1200
+            border.center_y = y
+            self.wall_list.append(border)
+
 
         # Create individual Cacti to block path
         cactus = arcade.Sprite("cactus.png", SPRITE_SCALING)
@@ -81,6 +97,28 @@ class MyGame(arcade.Window):
         cactus.center_x = 400
         cactus.center_y = 415
         self.wall_list.append(cactus)
+
+        cactus = arcade.Sprite("cactus.png", SPRITE_SCALING)
+        cactus.center_x = 500
+        cactus.center_y = 128
+        self.wall_list.append(cactus)
+
+        cactus = arcade.Sprite("cactus.png", SPRITE_SCALING)
+        cactus.center_x = 600
+        cactus.center_y = 610
+        self.wall_list.append(cactus)
+
+        cactus = arcade.Sprite("cactus.png", SPRITE_SCALING)
+        cactus.center_x = 1000
+        cactus.center_y = 700
+        self.wall_list.append(cactus)
+
+        wall = arcade.Sprite("boxCrate_single.png", SPRITE_SCALING)
+        wall.center_x = 500
+        wall.center_y = 64
+        self.wall_list.append(wall)
+
+        # Create boxes for main walls in game
 
         for x in range(200, 600, 64):
             if random.randrange(5) > 0:
@@ -95,6 +133,29 @@ class MyGame(arcade.Window):
                 wall.center_x = x
                 wall.center_y = 350
                 self.wall_list.append(wall)
+
+        for x in range(200, 800, 64):
+            if random.randrange(4) > 0:
+                wall = arcade.Sprite("boxCrate_single.png", SPRITE_SCALING)
+                wall.center_x = x
+                wall.center_y = 550
+                self.wall_list.append(wall)
+
+        for y in range(64, 400, 64):
+            if random.randrange(5) > 0:
+                wall = arcade.Sprite("boxCrate_single.png", SPRITE_SCALING)
+                wall.center_x = 700
+                wall.center_y = y
+                self.wall_list.append(wall)
+
+        for y in range(64, 700, 64):
+            if random.randrange(5) > 0:
+                wall = arcade.Sprite("boxCrate_single.png", SPRITE_SCALING)
+                wall.center_x = 1000
+                wall.center_y = y
+                self.wall_list.append(wall)
+
+
 
         # Set up coins
         for i in range(COIN_COUNT):
