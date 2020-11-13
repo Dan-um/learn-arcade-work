@@ -58,13 +58,4 @@ def main():
                 print("line", current_line, word)
 
 
-
-
-
-
-
-
-
-
-
 main()
