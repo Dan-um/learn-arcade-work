@@ -29,6 +29,7 @@ class MyGame(arcade.Window):
         # Score
         self.score = 0
 
+
     def setup(self):
 
         # Sprite Lists

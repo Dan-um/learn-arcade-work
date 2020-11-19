@@ -86,7 +86,6 @@ class MyGame(arcade.Window):
             border.center_y = y
             self.wall_list.append(border)
 
-
         # Create individual Cacti to block path
         cactus = arcade.Sprite("cactus.png", SPRITE_SCALING)
         cactus.center_x = 200
@@ -155,8 +154,6 @@ class MyGame(arcade.Window):
                 wall.center_y = y
                 self.wall_list.append(wall)
 
-
-
         # Set up coins
         for i in range(COIN_COUNT):
 
@@ -209,7 +206,7 @@ class MyGame(arcade.Window):
         self.coin_list.draw()
 
         output = f"Coins Collected: {self.score}"
-        arcade.draw_text(output, 40, 40, arcade.color.WHITE, 14)
+        arcade.draw_text(output, 40 + self.view_left, 40 + self.view_left, arcade.color.WHITE, 14)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
