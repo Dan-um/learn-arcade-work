@@ -39,13 +39,15 @@ class Bullet(arcade.Sprite):
 
 class Enemy(arcade.Sprite):
     def reset_pos(self):
-        self.center_y = random.randrange(SCREEN_HEIGHT + 20, SCREEN_HEIGHT + 100)
+        self.center_y = 500
         self.center_x = random.randrange(SCREEN_WIDTH)
+        self.change_x = 1
 
     def update(self):
-        self.center_x += MOVEMENT_SPEED_ENEMY
-        if self.center_x == 0:
+        if self.center_x >= 500:
             self.reset_pos()
+        self.physics_engine.update()
+
 
 
 class MyGame(arcade.Window):
@@ -58,17 +60,17 @@ class MyGame(arcade.Window):
 
         # Variables that will hold sprite lists
         self.player_list = None
-
-        # sprite lists
         self.enemy_list = None
         self.laser_list = None
         self.missile_list = None
         self.pickups_list = None
         self.wall_list = None
+        # Variable to hold the player sprite
         self.player_sprite = None
 
         # Set up physics engine
         self.physics_engine = None
+
         # Number holdings
         self.score = 0
         self.new_missiles = 0
@@ -111,28 +113,20 @@ class MyGame(arcade.Window):
         self.player_sprite.center_y = 64
         self.player_list.append(self.player_sprite)
 
-        # Create walls and platforms
-        # Walls from kenney.nl
-        for x in range(-200, 3000, 40):
-            wall = arcade.Sprite("stoneWall.png", SPRITE_SCALING)
-            wall.center_x = x
-            wall.center_y = 0
-            self.wall_list.append(wall)
+        # Load map from Tiled
+        # Name of map file to load
+        map_name = "map.tmx"
+        # Name of the layer in the file that has our platforms/walls
+        platform_layer_name = 'Platforms'
 
-        bridge = arcade.Sprite("bridge.png", SPRITE_SCALING)
-        bridge.center_x = 130
-        bridge.center_y = 200
-        self.wall_list.append(bridge)
+        # Read in the tiled map
+        my_map = arcade.tilemap.read_tmx(map_name)
 
-        bridge = arcade.Sprite("bridge.png", SPRITE_SCALING)
-        bridge.center_x = 170
-        bridge.center_y = 200
-        self.wall_list.append(bridge)
-
-        bridge = arcade.Sprite("bridge.png", SPRITE_SCALING)
-        bridge.center_x = 210
-        bridge.center_y = 200
-        self.wall_list.append(bridge)
+        # -- Platforms
+        self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
+                                                      layer_name=platform_layer_name,
+                                                      scaling=0.5,
+                                                      use_spatial_hash=True)
 
         # Create the enemies
         for i in range(ENEMY_COUNT):
@@ -144,7 +138,7 @@ class MyGame(arcade.Window):
             # Position the enemies
             enemy.center_x = random.randrange(SCREEN_WIDTH)
             enemy.center_y = random.randrange(120, SCREEN_HEIGHT)
-
+            enemy.physics_engine = arcade.PhysicsEnginePlatformer(enemy, self.wall_list, GRAVITY)
             # Add the enemies to the lists
             self.enemy_list.append(enemy)
 
@@ -152,6 +146,7 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
         # Set up physics engine
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
 
     def on_draw(self):
@@ -179,55 +174,57 @@ class MyGame(arcade.Window):
 
     # Set up user control
     def on_key_press(self, key, modifiers):
-        # if self.score >= 100 and self.lives >= 3:
-        if key == arcade.key.A and len(self.missile_list) < MISSILE_COUNT + self.new_missiles:
-            if self.current_missiles <= 0:
-                return
-            self.current_missiles -= 1
-            # Play missile sound
-            arcade.play_sound(self.missile_sound)
-            # Create missile
-            # Missile sprite from kenny.nl
+        # Only allows bullets and movement if the user has not died or the objective is not completed
+        if self.score < 25 and self.lives <= 3 and self.lives != 0:
+            # Shoot missiles only if we have missiles
+            if key == arcade.key.A and len(self.missile_list) < MISSILE_COUNT + self.new_missiles:
+                if self.current_missiles <= 0:
+                    return
+                self.current_missiles -= 1
+                # Play missile sound
+                arcade.play_sound(self.missile_sound)
+                # Create missile
+                # Missile sprite from kenny.nl
 
-            missile = Bullet("spaceMissiles_014.png", SPRITE_SCALING_MISSILE, 2)
+                missile = Bullet("spaceMissiles_014.png", SPRITE_SCALING_MISSILE, 2)
 
-            missile.angle = 270
+                missile.angle = 270
 
-            missile.change_x = MISSILE_SPEED
+                missile.change_x = MISSILE_SPEED
 
-            missile.center_x = self.player_sprite.center_x + 5
-            missile.bottom = self.player_sprite.top - 25
+                missile.center_x = self.player_sprite.center_x + 5
+                missile.bottom = self.player_sprite.top - 25
 
-            self.missile_list.append(missile)
+                self.missile_list.append(missile)
 
-        if key == arcade.key.S:
-            # Gunshot sound
-            arcade.play_sound(self.gun_sound)
-            # Create a laser
-            # Laser sprite from Kenny.nl
-            laser = arcade.Sprite("laserBlue03.png", SPRITE_SCALING_LASER)
+            if key == arcade.key.S:
+                # Gunshot sound
+                arcade.play_sound(self.gun_sound)
+                # Create a laser
+                # Laser sprite from Kenny.nl
+                laser = arcade.Sprite("laserBlue03.png", SPRITE_SCALING_LASER)
 
-            # The image points to the right, and we want it to point up. So
-            # rotate it.
-            laser.angle = 90
+                # The image points to the right, and we want it to point up. So
+                # rotate it.
+                laser.angle = 90
 
-            # Give the bullet a speed
-            laser.change_x = LASER_SPEED
+                # Give the bullet a speed
+                laser.change_x = LASER_SPEED
 
-            # Position the bullet
-            laser.center_x = self.player_sprite.center_x
-            laser.bottom = self.player_sprite.top - 25
+                # Position the bullet
+                laser.center_x = self.player_sprite.center_x
+                laser.bottom = self.player_sprite.top - 25
 
-            # Add the bullet to the appropriate lists
-            self.laser_list.append(laser)
+                # Add the bullet to the appropriate lists
+                self.laser_list.append(laser)
 
-        if key == arcade.key.UP:
-            if self.physics_engine.can_jump():
-                self.player_sprite.change_y = JUMP_HEIGHT
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
+            if key == arcade.key.UP:
+                if self.physics_engine.can_jump():
+                    self.player_sprite.change_y = JUMP_HEIGHT
+            elif key == arcade.key.LEFT:
+                self.player_sprite.change_x = -MOVEMENT_SPEED
+            elif key == arcade.key.RIGHT:
+                self.player_sprite.change_x = MOVEMENT_SPEED
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
@@ -333,7 +330,6 @@ class MyGame(arcade.Window):
                                 SCREEN_WIDTH + self.view_left,
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
-
 
 
 def main():
