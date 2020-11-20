@@ -1,32 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="25" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="3" nextobjectid="1">
- <tileset firstgid="1" name="my_tiles" tilewidth="70" tileheight="70" tilecount="7" columns="0">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="9" tilewidth="70" tileheight="70" infinite="0" nextlayerid="6" nextobjectid="1">
+ <tileset firstgid="1" name="Platforms" tilewidth="70" tileheight="70" tilecount="7" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
-   <image width="70" height="70" source="Tileset/metal.png"/>
+   <image width="70" height="70" source="../../Tileset/metal.png"/>
   </tile>
   <tile id="1">
-   <image width="70" height="70" source="Tileset/metalCenterWarning.png"/>
+   <image width="70" height="70" source="../../Tileset/metalCenterWarning.png"/>
   </tile>
   <tile id="2">
-   <image width="70" height="70" source="Tileset/metalPlatform.png"/>
+   <image width="70" height="70" source="../../Tileset/metalPlatformWire.png"/>
   </tile>
   <tile id="3">
-   <image width="70" height="70" source="Tileset/stoneCaveBottom.png"/>
+   <image width="70" height="70" source="../../Tileset/metalPlatform.png"/>
   </tile>
   <tile id="4">
-   <image width="70" height="70" source="Tileset/metalPlatformWire.png"/>
+   <image width="70" height="70" source="../../Tileset/stoneCaveBottom.png"/>
   </tile>
   <tile id="5">
-   <image width="70" height="70" source="Tileset/metalFence.png"/>
+   <image width="70" height="70" source="../../Tileset/metalFence.png"/>
   </tile>
   <tile id="6">
-   <image width="70" height="70" source="Tileset/beam.png"/>
+   <image width="70" height="70" source="../../Tileset/beam.png"/>
   </tile>
  </tileset>
- <layer id="1" name="Walls" width="25" height="20">
+ <layer id="1" name="Platforms" width="50" height="9">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMFIAIxqmJmCnsnnogBnJDmYoZsViLzOaPDOaXnzmM+BQhyzGgoOGqWNDwjCAHu6kYCYi1QEAc6wAkw==
+   eJxjZKAPYCQSU2I+PcCoP4g3n1qABYqZkTBMbCj4g4VIe+jhD1i4sUMxMW4DAWYkNjsBe+gZHzB/oAMWJIwLDLQ/8GEmKEYGMDFi3UYKprU/sOHB5A8AxHIBAA==
+  </data>
+ </layer>
+ <layer id="4" name="Do Not Touch" width="50" height="9">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMBgBKxIeBbQDABvkABA=
   </data>
  </layer>
 </map>

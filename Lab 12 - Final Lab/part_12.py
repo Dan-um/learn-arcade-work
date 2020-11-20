@@ -9,7 +9,7 @@ SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_ENEMY = 0.7
 SPRITE_SCALING_LASER = 0.8
 SPRITE_SCALING_MISSILE = 0.9
-ENEMY_COUNT = 10
+ENEMY_COUNT = 1
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -29,6 +29,18 @@ LEFT_VIEWPORT_MARGIN = 250
 RIGHT_VIEWPORT_MARGIN = 250
 BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
+# Constants for keeping track of if the player sprite is facing right or left
+RIGHT_FACING = 0
+LEFT_FACING = 1
+
+
+# def load_texture_pair(filename):
+#     """
+#     Load a texture pair, with the second being a mirror image.
+#     """
+#     return [
+#         arcade.load_texture(filename),
+#         arcade.load_texture(filename, flipped_horizontally=True)]
 
 
 class Bullet(arcade.Sprite):
@@ -44,10 +56,21 @@ class Enemy(arcade.Sprite):
         self.change_x = 1
 
     def update(self):
-        if self.center_x >= 500:
-            self.reset_pos()
-        self.physics_engine.update()
+        # if self.center_x >= 500:
+        #     self.reset_pos()
+        self.change_x = MOVEMENT_SPEED_ENEMY
+        hit_list = self.physics_engine.update()
+        print(len(hit_list))
 
+# class PlayerCharacter(arcade.Sprite):
+#     """ Player Sprite"""
+#     def __init__(self):
+#
+#         # Set up parent class
+#         super().__init__()
+#
+#         # Default to face-right
+#         self.character_face_direction = RIGHT_FACING
 
 
 class MyGame(arcade.Window):
@@ -65,6 +88,9 @@ class MyGame(arcade.Window):
         self.missile_list = None
         self.pickups_list = None
         self.wall_list = None
+        self.dont_touch_list = None
+        self.weapon_list = None
+        # self.pillar_list = None
         # Variable to hold the player sprite
         self.player_sprite = None
 
@@ -105,19 +131,28 @@ class MyGame(arcade.Window):
         self.missile_list = arcade.SpriteList()
         self.pickups_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
+        self.weapon_list = arcade.SpriteList()
 
         # Set up the player
         # Sprite image from kenney.nl
         self.player_sprite = arcade.Sprite("character_femalePerson_run0.png", SPRITE_SCALING_PLAYER)
-        self.player_sprite.center_x = 50
-        self.player_sprite.center_y = 64
+        self.player_sprite.center_x = 800
+        self.player_sprite.center_y = 500
         self.player_list.append(self.player_sprite)
+
+        # Create the weapon
+        gun = arcade.Sprite("raygunBig.png", 1)
+        gun.center_x = self.player_sprite.center_x + self.view_left
+        gun.center_y = self.player_sprite.center_y + self.view_bottom
+        self.weapon_list.append(gun)
 
         # Load map from Tiled
         # Name of map file to load
         map_name = "map.tmx"
         # Name of the layer in the file that has our platforms/walls
         platform_layer_name = 'Platforms'
+        dont_touch_layer_name = 'Do Not Touch'
+        # pillar_layer_name = 'Walls'
 
         # Read in the tiled map
         my_map = arcade.tilemap.read_tmx(map_name)
@@ -125,8 +160,14 @@ class MyGame(arcade.Window):
         # -- Platforms
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platform_layer_name,
-                                                      scaling=0.5,
+                                                      scaling=1,
                                                       use_spatial_hash=True)
+
+        self.dont_touch_list = arcade.tilemap.process_layer(my_map,
+                                                            dont_touch_layer_name,
+                                                            scaling=1,
+                                                            use_spatial_hash=True)
+        # self.pillar_list = arcade.tilemap.process_layer(my_map, pillar_layer_name, scaling=1, use_spatial_hash=True)
 
         # Create the enemies
         for i in range(ENEMY_COUNT):
@@ -136,8 +177,8 @@ class MyGame(arcade.Window):
             enemy = Enemy("character_robot_attack0.png", SPRITE_SCALING_ENEMY)
 
             # Position the enemies
-            enemy.center_x = random.randrange(SCREEN_WIDTH)
-            enemy.center_y = random.randrange(120, SCREEN_HEIGHT)
+            enemy.center_x = random.randrange(100, 1800)
+            enemy.center_y = 700
             enemy.physics_engine = arcade.PhysicsEnginePlatformer(enemy, self.wall_list, GRAVITY)
             # Add the enemies to the lists
             self.enemy_list.append(enemy)
@@ -163,19 +204,26 @@ class MyGame(arcade.Window):
         self.player_list.draw()
         self.missile_list.draw()
         self.wall_list.draw()
+        self.dont_touch_list.draw()
+        self.weapon_list.draw()
+        # self.pillar_list.draw()
 
         # Render the text
         arcade.draw_text(f"Score: {self.score}", 10 + self.view_left, 20 + self.view_bottom, arcade.color.WHITE, 14)
         arcade.draw_text(f"Missiles: {self.current_missiles}", 100 + self.view_left, 20 + self.view_bottom, arcade.color.WHITE, 14)
-        arcade.draw_text(f"Health: {self.lives}", 200 + self.view_left, 20 + self.view_bottom, arcade.color.WHITE, 14)
+        if self.lives > 0:
+            arcade.draw_text(f"Health: {self.lives}", 200 + self.view_left, 20 + self.view_bottom, arcade.color.WHITE, 14)
         if self.lives <= 0:
             arcade.draw_text("GAME OVER!", 400 + self.view_left, 300 + self.view_bottom, arcade.color.WHITE,
+                             14)
+        if self.score >= 20:
+            arcade.draw_text("YOU WIN!", 400 + self.view_left, 300 + self.view_bottom, arcade.color.WHITE,
                              14)
 
     # Set up user control
     def on_key_press(self, key, modifiers):
         # Only allows bullets and movement if the user has not died or the objective is not completed
-        if self.score < 25 and self.lives <= 3 and self.lives != 0:
+        if self.score < 20 and self.lives <= 3 and self.lives != 0:
             # Shoot missiles only if we have missiles
             if key == arcade.key.A and len(self.missile_list) < MISSILE_COUNT + self.new_missiles:
                 if self.current_missiles <= 0:
@@ -237,13 +285,15 @@ class MyGame(arcade.Window):
     def update(self, delta_time):
         """ Movement and game logic """
         # Only move sprites if the objective is not completed or the user has not lost
-        if self.lives > 0 or self.score >= 25:
+        if self.lives > 0 or self.score >= 20:
             self.physics_engine.update()
 
-            # Call update on bullet sprites
+            # Call update on sprites
             self.laser_list.update()
             self.missile_list.update()
             self.enemy_list.update()
+            self.weapon_list[0].center_x = self.player_sprite.center_x
+            self.weapon_list[0].center_y = self.player_sprite.center_y
 
         # See if the player has touched an enemy, if they have, remove health
         health_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
@@ -289,7 +339,17 @@ class MyGame(arcade.Window):
             if missile.bottom > SCREEN_HEIGHT:
                 missile.remove_from_sprite_lists()
 
-        # --- Manage Scrolling ---
+        if arcade.check_for_collision_with_list(self.player_sprite,
+                                                self.dont_touch_list):
+            self.lives -= 3
+
+        for enemy in self.enemy_list:
+            hit_list = arcade.check_for_collision_with_list(enemy, self.dont_touch_list)
+            if len(hit_list) > 0:
+                enemy.remove_from_sprite_lists()
+                self.score += 1
+
+        # --- Manage Scrolling --- #
 
         # Track if we need to change the viewport
 
