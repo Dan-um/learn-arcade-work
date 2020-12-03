@@ -9,7 +9,7 @@ SPRITE_SCALING_PLAYER = 0.5
 SPRITE_SCALING_ENEMY = 0.7
 SPRITE_SCALING_LASER = 0.8
 SPRITE_SCALING_MISSILE = 0.9
-ENEMY_COUNT = 1
+ENEMY_COUNT = 20
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -50,6 +50,10 @@ class Bullet(arcade.Sprite):
 
 
 class Enemy(arcade.Sprite):
+    # def __init__(self, image, scale, walls):
+    #     super().__init__(image, scale)
+    #     self.walls = walls
+
     def reset_pos(self):
         self.center_y = 500
         self.center_x = random.randrange(SCREEN_WIDTH)
@@ -58,9 +62,15 @@ class Enemy(arcade.Sprite):
     def update(self):
         # if self.center_x >= 500:
         #     self.reset_pos()
-        self.change_x = MOVEMENT_SPEED_ENEMY
-        hit_list = self.physics_engine.update()
-        print(len(hit_list))
+        # self.change_x = MOVEMENT_SPEED_ENEMY
+        self.physics_engine.update()
+        self.center_x += self.change_x
+        hit_list = arcade.check_for_collision_with_list(self, self.physics_engine.platforms)
+        if len(hit_list) > 0:
+            self.change_x *= -1
+        self.center_x -= self.change_x
+
+
 
 # class PlayerCharacter(arcade.Sprite):
 #     """ Player Sprite"""
@@ -141,8 +151,9 @@ class MyGame(arcade.Window):
         self.player_list.append(self.player_sprite)
 
         # Create the weapon
-        gun = arcade.Sprite("raygunBig.png", 1)
-        gun.center_x = self.player_sprite.center_x + self.view_left
+        # Gun sprite from kenney.nl
+        gun = arcade.Sprite("raygunBig.png", .75)
+        gun.center_x = self.player_sprite.center_x + self.view_left + 50
         gun.center_y = self.player_sprite.center_y + self.view_bottom
         self.weapon_list.append(gun)
 
@@ -177,8 +188,14 @@ class MyGame(arcade.Window):
             enemy = Enemy("character_robot_attack0.png", SPRITE_SCALING_ENEMY)
 
             # Position the enemies
-            enemy.center_x = random.randrange(100, 1800)
+            success = False
+            while not success:
+                enemy.center_x = random.randrange(100, 1800)
+                distance = abs(enemy.center_x - self.player_sprite.center_x)
+                if distance > 200:
+                    success = True
             enemy.center_y = 700
+            enemy.change_x = MOVEMENT_SPEED_ENEMY
             enemy.physics_engine = arcade.PhysicsEnginePlatformer(enemy, self.wall_list, GRAVITY)
             # Add the enemies to the lists
             self.enemy_list.append(enemy)
@@ -292,7 +309,7 @@ class MyGame(arcade.Window):
             self.laser_list.update()
             self.missile_list.update()
             self.enemy_list.update()
-            self.weapon_list[0].center_x = self.player_sprite.center_x
+            self.weapon_list[0].center_x = self.player_sprite.center_x + 50
             self.weapon_list[0].center_y = self.player_sprite.center_y
 
         # See if the player has touched an enemy, if they have, remove health
