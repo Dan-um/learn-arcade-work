@@ -29,18 +29,41 @@ LEFT_VIEWPORT_MARGIN = 250
 RIGHT_VIEWPORT_MARGIN = 250
 BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
-# Constants for keeping track of if the player sprite is facing right or left
-RIGHT_FACING = 0
-LEFT_FACING = 1
 
 
-# def load_texture_pair(filename):
-#     """
-#     Load a texture pair, with the second being a mirror image.
-#     """
-#     return [
-#         arcade.load_texture(filename),
-#         arcade.load_texture(filename, flipped_horizontally=True)]
+class InstructionView(arcade.View):
+    def on_show(self):
+        arcade.set_background_color(arcade.color.DEEP_SPACE_SPARKLE)
+
+        # Reset the viewport, necessary if we have a scrolling game and we need
+        # to reset the viewport back to the start so we can see what we draw.
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+        """ Draw this view """
+        arcade.start_render()
+        arcade.draw_text("WELCOME TO ROBOT RUMBLE", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_text("Press A to shoot a missile, press S to shoot a laser.",
+                         SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 50,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("Shoot with the laser to get more missiles. ", SCREEN_WIDTH / 2,
+                         SCREEN_HEIGHT / 2 - 100,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("Missiles destroy two robots with one shot, but you have a limited supply. ", SCREEN_WIDTH / 2,
+                         SCREEN_HEIGHT / 2 - 150,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("Use arrow keys to control the character.", SCREEN_WIDTH / 2,
+                         SCREEN_HEIGHT / 2 - 200,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+        arcade.draw_text("Click to start!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 250,
+                         arcade.color.WHITE, font_size=20, anchor_x="center")
+
+    def on_mouse_press(self, _x, _y, _button, _modifiers):
+        """ If the user presses the mouse button, start the game. """
+        game_view = GameView()
+        game_view.setup()
+        self.window.show_view(game_view)
 
 
 class Bullet(arcade.Sprite):
@@ -71,32 +94,19 @@ class Enemy(arcade.Sprite):
         self.center_x -= self.change_x
 
 
-
-# class PlayerCharacter(arcade.Sprite):
-#     """ Player Sprite"""
-#     def __init__(self):
-#
-#         # Set up parent class
-#         super().__init__()
-#
-#         # Default to face-right
-#         self.character_face_direction = RIGHT_FACING
-
-
-class MyGame(arcade.Window):
+class GameView(arcade.View):
     """ Main application class. """
 
     def __init__(self):
         """ Initializer """
         # Call the parent class initializer
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # Variables that will hold sprite lists
         self.player_list = None
         self.enemy_list = None
         self.laser_list = None
         self.missile_list = None
-        self.pickups_list = None
         self.wall_list = None
         self.dont_touch_list = None
         self.weapon_list = None
@@ -117,12 +127,13 @@ class MyGame(arcade.Window):
         self.view_left = 0
 
         # Don't show the mouse cursor
-        self.set_mouse_visible(False)
+        self.window.set_mouse_visible(False)
 
         # Load sounds. Sounds from kenney.nl
         self.gun_sound = arcade.load_sound("laserSmall_001.ogg")
         self.hit_sound = arcade.load_sound("explosionCrunch_000.ogg")
         self.missile_sound = arcade.load_sound("impactMetal_000.ogg")
+        self.reload_sound = arcade.load_sound("doorOpen_002.ogg")
 
         arcade.set_background_color(arcade.color.BLUE)
 
@@ -139,7 +150,6 @@ class MyGame(arcade.Window):
         self.enemy_list = arcade.SpriteList()
         self.laser_list = arcade.SpriteList()
         self.missile_list = arcade.SpriteList()
-        self.pickups_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.weapon_list = arcade.SpriteList()
 
@@ -152,7 +162,7 @@ class MyGame(arcade.Window):
 
         # Create the weapon
         # Gun sprite from kenney.nl
-        gun = arcade.Sprite("raygunBig.png", .75)
+        gun = arcade.Sprite("raygunBig.png", .50)
         gun.center_x = self.player_sprite.center_x + self.view_left + 50
         gun.center_y = self.player_sprite.center_y + self.view_bottom
         self.weapon_list.append(gun)
@@ -223,7 +233,6 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.dont_touch_list.draw()
         self.weapon_list.draw()
-        # self.pillar_list.draw()
 
         # Render the text
         arcade.draw_text(f"Score: {self.score}", 10 + self.view_left, 20 + self.view_bottom, arcade.color.WHITE, 14)
@@ -309,8 +318,8 @@ class MyGame(arcade.Window):
             self.laser_list.update()
             self.missile_list.update()
             self.enemy_list.update()
-            self.weapon_list[0].center_x = self.player_sprite.center_x + 50
-            self.weapon_list[0].center_y = self.player_sprite.center_y
+            self.weapon_list[0].center_x = self.player_sprite.center_x + 15
+            self.weapon_list[0].center_y = self.player_sprite.center_y - 15
 
         # See if the player has touched an enemy, if they have, remove health
         health_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.enemy_list)
@@ -332,7 +341,9 @@ class MyGame(arcade.Window):
             for enemy in hit_list:
                 enemy.remove_from_sprite_lists()
                 self.score += 1
-                # if random.randrange(1, 4) == 2:
+                if random.randrange(4) == 2:
+                    self.current_missiles += 1
+                    arcade.play_sound(self.reload_sound)
 
                 # Hit Sound
                 arcade.play_sound(self.hit_sound)
@@ -365,6 +376,7 @@ class MyGame(arcade.Window):
             if len(hit_list) > 0:
                 enemy.remove_from_sprite_lists()
                 self.score += 1
+                arcade.play_sound(self.hit_sound)
 
         # --- Manage Scrolling --- #
 
@@ -410,8 +422,9 @@ class MyGame(arcade.Window):
 
 
 def main():
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = InstructionView()
+    window.show_view(start_view)
     arcade.run()
 
 

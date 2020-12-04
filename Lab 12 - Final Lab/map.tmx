@@ -26,7 +26,7 @@
  </tileset>
  <layer id="1" name="Platforms" width="50" height="9">
   <data encoding="base64" compression="zlib">
-   eJxjZKAPYCQSU2I+PcCoP4g3n1qABYqZkTBMbCj4g4VIe+jhD1i4sUMxMW4DAWYkNjsBe+gZHzB/oAMWJIwLDLQ/8GEmKEYGMDFi3UYKprU/sOHB5A8AxHIBAA==
+   eJxjZKAPYCQSU2I+PcBQ8gc7AXsGuz9YkGgQZkbCMLmh4A9i7aGXP5DDEsZnQJNHF2dmwA3YkfBgiA986Z5YNfTwBz7MBMXIACZGrNtIwbT2BzY8mPwBAMjOAPo=
   </data>
  </layer>
  <layer id="4" name="Do Not Touch" width="50" height="9">
